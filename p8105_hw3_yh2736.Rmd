@@ -14,3 +14,61 @@ library(lubridate)
 library(ggplot2)
 ```
 
+# Problem 1
+```{r, instacart, echo = TRUE}
+#check the file size of dataset instacart
+object.size(instacart)
+
+#review the variable
+str(instacart)
+
+#check the dataset
+summary(instacart)
+
+#review the first 10 observations
+head(instacart)
+
+```
+
+dataset instacart size is 108695344 byte , about 103.66MB. it including 15 variables, 1384617 observations. variables including order_id, product_id, add_to_cart_order, reordered, user_id, eval_set, order_number, order_dow, order_hour_of_day, days_since_prior_order, product_name, aisle_id, department_id and aisle. 
+
+
+```{r}
+##aisles counters
+aisle_dataset <- instacart %>% 
+  janitor::clean_names() %>% 
+  group_by(aisle) %>% 
+  summarize(
+    aisle_count = n()
+  ) %>% 
+  arrange(desc(aisle_count)) %>%           ##according orderd quantity descending arrange the aisle
+  select(aisle, aisle_count)               ##select "aisle" and "aisle_count" variable
+
+aisle_dataset                              ##display the counted aisle
+
+```
+
+There are 134 aisles, and the most important top 3 aisles is "fresh vegetables", "fresh fruits" and "packaged vegetables fruits". items ordered from those top3 aisles is 150609, 150473 and 78493 individuely. 
+
+```{r}
+##plot aisle which ordered item larger than 10000
+aisle_dataset %>% 
+  filter(aisle_count > 10000) %>% 
+  ggplot(aes(x = reorder(aisle, aisle_count), y = aisle_count)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Number of productions ordered from each aisles",
+    x = "aisle identification",
+    y = "order numbers",
+    caption = "data from https://www.instacart.com/datasets/grocery-shopping-2017"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5, 
+                              size = 15, 
+                              face = "bold",
+                              color = "blue")
+  )
+
+```
+
