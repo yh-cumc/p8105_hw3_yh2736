@@ -1,0 +1,16 @@
+---
+title: "p8105_hw3_yh"
+author: "Yongmei Huang"
+date: "10/9/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(p8105.datasets)
+data("instacart")
+library(lubridate)
+library(ggplot2)
+```
+
