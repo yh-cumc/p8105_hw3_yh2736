@@ -26,7 +26,7 @@ str(instacart)
 summary(instacart)
 
 #review the first 10 observations
-head(instacart)
+head(instacart, 10)
 
 ```
 
@@ -106,12 +106,12 @@ production_filter <- c("Pink Lady Apples", "Coffee Ice Cream")
 ##based on the production name to calculate the mean order time
 mean_order_time <- instacart %>% 
   select(order_dow, order_hour_of_day, product_name) %>% 
-  filter(product_name %in% production_filter) %>% 
+  filter(product_name %in% production_filter) %>%        ## filter two items
   group_by(order_dow, product_name) %>% 
   summarize(
     mean_order_hour = round(mean(order_hour_of_day), 
                             digits = 0)
-  ) %>% 
+  ) %>%                                                  ##caculate mean oder time of two item
   pivot_wider(
     names_from = "product_name",
     values_from = "mean_order_hour"
@@ -119,14 +119,14 @@ mean_order_time <- instacart %>%
   mutate(
     day_of_week = wday(order_dow + 1, 
                        label = TRUE) 
-  ) %>% 
+  ) %>%                                                  ##add a new col convert number to weekday     
   janitor::clean_names() %>% 
   select(day_of_week, coffee_ice_cream, pink_lady_apples, order_dow) %>% 
   pivot_longer(
     coffee_ice_cream:pink_lady_apples,
     names_to = "production_name",
     values_to = "mean_order_time"
-  ) %>% 
+  ) %>%                                                  
   as.tibble()
 
 mean_ordered_dataset <- mean_order_time %>% 
@@ -139,6 +139,96 @@ mean_ordered_dataset <- mean_order_time %>%
 knitr::kable(mean_ordered_dataset, 
              align = c(rep('c', time = 8)), 
              caption = "mean order time of two production on each day of a week")
+
+```
+
+# Problem 2
+```{r}
+#tidy the data
+##setup health status filter factor
+health_status_factor <- c("Poor", "Fair", "Good", "Very good", "Excellent")
+
+##format the dataset, and then filter the data
+brfss_dataset <- brfss_smart2010 %>% 
+  janitor::clean_names() %>% 
+  filter(
+    topic == "Overall Health"
+  ) %>%                                          ##just select "Overall Health" topic
+  filter(
+    response %in% health_status_factor
+  )                                              ##filter response from "Excellent" to "Poor"
+
+##transfer response from chr to factor
+brfss_dataset$response =  as.factor(brfss_dataset$response)
+
+##ordered response from “Poor” to “Excellent”
+
+
+
+##brfss_dataset$response = order(brfss_dataset$response)
+
+##check point
+str(brfss_dataset$response)                       ##response is factor
+head(brfss_dataset, 10)                           ##check the value of response of head 10 rows
+tail(brfss_dataset, 10)                           ##check the value of response of tail 10 rows
+missing(brfss_dataset)
+
+```
+
+```{r}
+##table the states which observed more than 7 loactions in 2002
+observed_2002_dataset <- brfss_dataset %>% 
+  select(year, locationabbr, locationdesc) %>% 
+  group_by(year, locationabbr) %>% 
+  summarize(
+    desc_total = n()
+  ) %>% 
+  filter(year == 2002, desc_total >= 7)
+
+knitr::kable(observed_2002_dataset, 
+             align = c(rep('c', time = 3)), 
+             caption = "States which observed more than 7 locations in 2002")
+
+```
+
+```{r}
+##table the states which observed time more than 7 locations in 2010
+observed_2010_dataset <- brfss_dataset %>% 
+  select(year, locationabbr, locationdesc) %>% 
+  group_by(year, locationabbr) %>% 
+  summarize(
+    desc_total = n()
+  ) %>% 
+  filter(year == 2010, desc_total >= 7)
+
+knitr::kable(observed_2010_dataset, 
+             align = c(rep('c', time = 3)), 
+             caption = "States which observed more than 7 locations in 2010")
+
+```
+
+```{r}
+##statistic the states number of 2002 and 2010
+count(observed_2002_dataset)
+count(observed_2010_dataset)
+```
+
+In 2002, there have 36 states which observed 7 or more loactions. In 2010, the number of states which observed 7 or more loaction was 45.
+
+```{r}
+##filter the response with "excellent"
+exclt_resp_dataset <- brfss_dataset %>% 
+  filter(response == "Excellent") %>% 
+  select(year, locationabbr, data_value) %>% 
+  group_by(year, locationabbr) %>% 
+  summarize(
+    mean_data_value = mean(data_value, na.rm = TRUE)
+  ) 
+
+ggplot(exclt_resp_dataset, aes(x = year, y = mean_data_value)) +
+  geom_line(aes(group = locationabbr), color = "blue") +
+  geom_point(aes(color = locationabbr))
+
 
 ```
 
