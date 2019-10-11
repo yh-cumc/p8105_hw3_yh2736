@@ -72,3 +72,17 @@ aisle_dataset %>%
 
 ```
 
+```{r}
+##setup aisle filter factor
+aisle_filter_factor <- c("baking ingredients", 
+                         "dog food care", 
+                         "packaged vegetables fruits")
+
+##selected three most important items in each aisles
+three_import_item_dataset <- instacart %>% 
+  group_by(
+    aisle, product_name
+  )
+
+```
+
