@@ -82,7 +82,63 @@ aisle_filter_factor <- c("baking ingredients",
 three_import_item_dataset <- instacart %>% 
   group_by(
     aisle, product_name
+  ) %>%                                                
+  summarize(
+    production_order_times = n()
+  ) %>% 
+  filter(aisle %in% aisle_filter_factor) %>%         ##filter 3 aisles
+  arrange(desc(production_order_times)) %>%          ##descending ording based on order times
+  group_by(aisle) %>% 
+  slice(1:3)                                         ##filter the top3 items
+
+knitr::kable(three_import_item_dataset, 
+             align = c(rep('c', time = 3)), 
+             caption = "top3 popular production in 3 aisles")    ##using a table to display the output
+
+```
+
+```{r}
+##display a table to show the ordered time of two production on each day of the week
+
+##setup the filter factor with "Pink Lady Apples" and "Coffee Ice Cream"
+production_filter <- c("Pink Lady Apples", "Coffee Ice Cream")
+
+##based on the production name to calculate the mean order time
+mean_order_time <- instacart %>% 
+  select(order_dow, order_hour_of_day, product_name) %>% 
+  filter(product_name %in% production_filter) %>% 
+  group_by(order_dow, product_name) %>% 
+  summarize(
+    mean_order_hour = round(mean(order_hour_of_day), 
+                            digits = 0)
+  ) %>% 
+  pivot_wider(
+    names_from = "product_name",
+    values_from = "mean_order_hour"
+  ) %>% 
+  mutate(
+    day_of_week = wday(order_dow + 1, 
+                       label = TRUE) 
+  ) %>% 
+  janitor::clean_names() %>% 
+  select(day_of_week, coffee_ice_cream, pink_lady_apples, order_dow) %>% 
+  pivot_longer(
+    coffee_ice_cream:pink_lady_apples,
+    names_to = "production_name",
+    values_to = "mean_order_time"
+  ) %>% 
+  as.tibble()
+
+mean_ordered_dataset <- mean_order_time %>% 
+  select(day_of_week, production_name, mean_order_time) %>% 
+  pivot_wider(
+    names_from = "day_of_week",
+    values_from = "mean_order_time"
   )
+
+knitr::kable(mean_ordered_dataset, 
+             align = c(rep('c', time = 8)), 
+             caption = "mean order time of two production on each day of a week")
 
 ```
 
