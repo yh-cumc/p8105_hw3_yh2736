@@ -15,7 +15,8 @@ library(ggplot2)
 ```
 
 # Problem 1
-```{r, instacart, echo = TRUE}
+## figure out the total aisles number and important production of each aisles
+```{r, instacart, echo = FALSE}
 #check the file size of dataset instacart
 object.size(instacart)
 
@@ -33,7 +34,7 @@ head(instacart, 10)
 dataset instacart size is 108695344 byte , about 103.66MB. it including 15 variables, 1384617 observations. variables including order_id, product_id, add_to_cart_order, reordered, user_id, eval_set, order_number, order_dow, order_hour_of_day, days_since_prior_order, product_name, aisle_id, department_id and aisle. 
 
 
-```{r}
+```{r, echo = FALSE}
 ##aisles counters
 aisle_dataset <- instacart %>% 
   janitor::clean_names() %>% 
@@ -50,7 +51,8 @@ aisle_dataset                              ##display the counted aisle
 
 There are 134 aisles, and the most important top 3 aisles is "fresh vegetables", "fresh fruits" and "packaged vegetables fruits". items ordered from those top3 aisles is 150609, 150473 and 78493 individuely. 
 
-```{r}
+## A plot to show the ordered number in each aisles which ordered times > 10000
+```{r, echo = FALSE}
 ##plot aisle which ordered item larger than 10000
 aisle_dataset %>% 
   filter(aisle_count > 10000) %>% 
@@ -72,7 +74,8 @@ aisle_dataset %>%
 
 ```
 
-```{r}
+## A table to show top3 popular productions in 3 aisles
+```{r, echo = FALSE}
 ##setup aisle filter factor
 aisle_filter_factor <- c("baking ingredients", 
                          "dog food care", 
@@ -97,7 +100,9 @@ knitr::kable(three_import_item_dataset,
 
 ```
 
-```{r}
+
+## A table to show order time of 2 items in each day
+```{r, echo = FALSE, warning=FALSE}
 ##display a table to show the ordered time of two production on each day of the week
 
 ##setup the filter factor with "Pink Lady Apples" and "Coffee Ice Cream"
@@ -143,7 +148,8 @@ knitr::kable(mean_ordered_dataset,
 ```
 
 # Problem 2
-```{r}
+## Tidy dataset
+```{r, echo = FALSE}
 #tidy the data
 ##setup health status filter factor
 health_status_factor <- c("Poor", "Fair", "Good", "Very good", "Excellent")
@@ -182,7 +188,10 @@ missing(brfss_dataset)
 
 ```
 
-```{r}
+Summary here:
+
+## Show the states which observed more than 7 locations in 2002 and 2010
+```{r, echo = FALSE}
 ##table the states which observed more than 7 loactions in 2002
 observed_2002_dataset <- brfss_dataset %>% 
   select(year, locationabbr, locationdesc) %>% 
@@ -198,7 +207,7 @@ knitr::kable(observed_2002_dataset,
 
 ```
 
-```{r}
+```{r, echo = FALSE}
 ##table the states which observed time more than 7 locations in 2010
 observed_2010_dataset <- brfss_dataset %>% 
   select(year, locationabbr, locationdesc) %>% 
@@ -214,7 +223,7 @@ knitr::kable(observed_2010_dataset,
 
 ```
 
-```{r}
+```{r, echo = FALSE}
 ##statistic the states number of 2002 and 2010
 count(observed_2002_dataset)
 count(observed_2010_dataset)
@@ -222,7 +231,9 @@ count(observed_2010_dataset)
 
 In 2002, there have 36 states which observed 7 or more loactions. In 2010, the number of states which observed 7 or more loaction was 45.
 
-```{r}
+## A plot to show mean value during period of each states
+
+```{r, echo = FALSE}
 ##filter the response with "excellent"
 exclt_resp_dataset <- brfss_dataset %>% 
   filter(response == "Excellent") %>% 
@@ -250,7 +261,9 @@ ggplot(exclt_resp_dataset, aes(x = year, y = mean_data_value)) +
 
 ```
 
-```{r}
+
+## A two-panel plot to show the distribution of data value of different response in 2006 and 2010
+```{r, echo = FALSE, warning = FALSE}
 ##2006 and 2010 data_value distibution of "Poor", "Fair", "Good", "Very good" and "Excellent"
 ##filter the dataset to "NY" and year 2006 and 2010
 data_value_ny_2006_and_2010 <- brfss_dataset %>% 
@@ -283,7 +296,81 @@ ggplot(data_value_ny_2006_and_2010, aes(x = response, y = data_value)) +
   coord_flip()
 
 
+```
 
+
+# Problem 3
+## tidy the dataset
+```{r,echo = FALSE}
+accem_dataset <- read_csv(file = "./data/accel_data.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    weekday_or_weekend = case_when(
+      day == "Monday"          ~ "weekday",
+      day == "Tuesday"         ~ "weekday",
+      day == "Wednesday"       ~ "weekday",
+      day == "Thursday"        ~ "weekday",
+      day == "Friday"          ~ "weekday",
+      day == "Saturday"        ~ "weekend",
+      day == "Sunday"          ~ "weekend",
+      TRUE                     ~ "NA"
+    )
+  ) %>% 
+  pivot_longer(
+    activity_1:activity_1440,
+    names_to = "minutes",
+    values_to = "measured_value",
+    names_prefix = "activity_"
+  )
+
+##convert the viriable minutes from chr to int
+accem_dataset$minutes = as.integer(accem_dataset$minutes)
+
+##summary the dataset
+str(accem_dataset)
+summary(accem_dataset)
+head(accem_dataset, 10)
+
+```
+
+
+## Total activity of each day
+```{r, echo = FALSE}
+accem_day_dataset <- accem_dataset %>% 
+  group_by(week, day_id) %>% 
+  summarize(
+    day_activity = sum(measured_value)
+  )
+
+## A table to display total activity per day
+knitr::kable(accem_day_dataset, align = (rep('c', times = 3)), 
+             caption = "Total activity of each day")
+
+```
+
+## Daily activity trency
+```{r, echo = FALSE}
+##trency of daily activity
+accem_day_dataset %>% 
+  ggplot(aes(x = day_id, y = day_activity, group = week, color = week)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "The trency of daily activity",
+    x = "Day",
+    y = "Activity"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12, face = "bold", color = "blue")
+  )
+```
+
+## A plot to show daily activity for each day
+```{r, echo = FALSE}
+accem_dataset %>% 
+  ggplot(aes(x = minutes, y = measured_value, group = day_id, color = day)) +
+  geom_line() +
+  facet_grid(day_id~.) 
 
 ```
 
