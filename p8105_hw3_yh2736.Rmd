@@ -158,12 +158,19 @@ brfss_dataset <- brfss_smart2010 %>%
     response %in% health_status_factor
   )                                              ##filter response from "Excellent" to "Poor"
 
-##transfer response from chr to factor
-brfss_dataset$response =  as.factor(brfss_dataset$response)
+##modify variable response from character to factor and 
+##the same time change the order of observation value
+brfss_dataset$response <- factor(brfss_dataset$response, 
+                                 levels = c("Poor",
+                                            "Fair",
+                                            "Good",
+                                            "Very good",
+                                            "Excellent")
+                                 )
 
-##ordered response from “Poor” to “Excellent”
-
-
+##ordered response from "Poor" to " Excellent"
+brfss_dataset = brfss_dataset[order(brfss_dataset$response, 
+                                    decreasing = FALSE), ]
 
 ##brfss_dataset$response = order(brfss_dataset$response)
 
@@ -227,8 +234,19 @@ exclt_resp_dataset <- brfss_dataset %>%
 
 ggplot(exclt_resp_dataset, aes(x = year, y = mean_data_value)) +
   geom_line(aes(group = locationabbr), color = "blue") +
-  geom_point(aes(color = locationabbr))
-
+  geom_point(aes(color = locationabbr)) +
+    labs(
+    title = "mean data value of different states in year 2002~2010",
+    x = "Year",
+    y = "Mean Data Value",
+    caption = "data from https://www.instacart.com/datasets/grocery-shopping-2017"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5, 
+                              size = 15, 
+                              face = "bold",
+                              color = "blue")
+  ) 
 
 ```
 
