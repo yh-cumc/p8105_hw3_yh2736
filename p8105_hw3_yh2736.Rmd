@@ -8,15 +8,16 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-library(p8105.datasets)
-data("instacart")
 library(lubridate)
 library(ggplot2)
 ```
 
 # Problem 1
-## figure out the total aisles number and important production of each aisles
+## Figure out the total aisles number and important production of each aisles
 ```{r, instacart, echo = FALSE}
+#Upload the "instacart dataset
+library(p8105.datasets)
+data("instacart")
 #check the file size of dataset instacart
 object.size(instacart)
 
@@ -26,12 +27,12 @@ str(instacart)
 #check the dataset
 summary(instacart)
 
-#review the first 10 observations
-head(instacart, 10)
+#review the first 8 observations
+head(instacart, 8)
 
 ```
 
-dataset instacart size is 108695344 byte , about 103.66MB. it including 15 variables, 1384617 observations. variables including order_id, product_id, add_to_cart_order, reordered, user_id, eval_set, order_number, order_dow, order_hour_of_day, days_since_prior_order, product_name, aisle_id, department_id and aisle. 
+Dataset instacart has a size of 108695344 byte , about 103.66MB. It contains 1384617 observations and 15 variables, including order_id, product_id, add_to_cart_order, reordered, user_id, eval_set, order_number, order_dow, order_hour_of_day, days_since_prior_order, product_name, aisle_id, department_id and aisle. As an example, the first order (order_id = 1, user_id = 112108) includes 8 products (product_id), and the sequence of adding the products to the cart was label from 1 to 8. Among all of 8 orders, 4 of them were reorded and 4 were first ordered. The evaluation set was at the train. It was thursday 10am when the products were placed into orders.Days since prior order to current order was 9 days. Theight products include Yogurt, organic 4% milk fat whole milk cottage cheese, celery hearts, cucumber, sardines, bananas, avocado, and the whole string cheese. 
 
 
 ```{r, echo = FALSE}
@@ -49,7 +50,7 @@ aisle_dataset                              ##display the counted aisle
 
 ```
 
-There are 134 aisles, and the most important top 3 aisles is "fresh vegetables", "fresh fruits" and "packaged vegetables fruits". items ordered from those top3 aisles is 150609, 150473 and 78493 individuely. 
+There are 134 aisles, and the top 3 aisles is "fresh vegetables", "fresh fruits" and "packaged vegetables fruits" with the ordered items of 150609, 150473 and 78493, respectively. 
 
 ## A plot to show the ordered number in each aisles which ordered times > 10000
 ```{r, echo = FALSE}
@@ -132,7 +133,7 @@ mean_order_time <- instacart %>%
     names_to = "production_name",
     values_to = "mean_order_time"
   ) %>%                                                  
-  as.tibble()
+  as_tibble()
 
 mean_ordered_dataset <- mean_order_time %>% 
   select(day_of_week, production_name, mean_order_time) %>% 
@@ -155,6 +156,8 @@ knitr::kable(mean_ordered_dataset,
 health_status_factor <- c("Poor", "Fair", "Good", "Very good", "Excellent")
 
 ##format the dataset, and then filter the data
+data("brfss_smart2010")
+
 brfss_dataset <- brfss_smart2010 %>% 
   janitor::clean_names() %>% 
   filter(
@@ -188,7 +191,7 @@ missing(brfss_dataset)
 
 ```
 
-Summary here:
+
 
 ## Show the states which observed more than 7 locations in 2002 and 2010
 ```{r, echo = FALSE}
@@ -206,6 +209,8 @@ knitr::kable(observed_2002_dataset,
              caption = "States which observed more than 7 locations in 2002")
 
 ```
+
+
 
 ```{r, echo = FALSE}
 ##table the states which observed time more than 7 locations in 2010
@@ -229,7 +234,7 @@ count(observed_2002_dataset)
 count(observed_2010_dataset)
 ```
 
-In 2002, there have 36 states which observed 7 or more loactions. In 2010, the number of states which observed 7 or more loaction was 45.
+In 2002, there are 36 states which observed 7 or more loactions. In 2010, the number of states which observed 7 or more loaction was 45.
 
 ## A plot to show mean value during period of each states
 
@@ -268,7 +273,7 @@ ggplot(exclt_resp_dataset, aes(x = year, y = mean_data_value)) +
 ##filter the dataset to "NY" and year 2006 and 2010
 data_value_ny_2006_and_2010 <- brfss_dataset %>% 
   filter(locationabbr == "NY") %>% 
-  filter(year == c("2006", "2010")) %>% 
+  filter(year == c("2006", "2010")) %>%  
   group_by(locationdesc)
 
 
