@@ -327,6 +327,7 @@ accem_dataset <- read_csv(file = "./data/accel_data.csv") %>%
     values_to = "measured_value",
     names_prefix = "activity_"
   )
+view(accem_dataset)
 
 ##convert the viriable minutes from chr to int
 accem_dataset$minutes = as.integer(accem_dataset$minutes)
@@ -335,9 +336,11 @@ accem_dataset$minutes = as.integer(accem_dataset$minutes)
 str(accem_dataset)
 summary(accem_dataset)
 head(accem_dataset, 10)
+nrow(accem_dataset)
+
 
 ```
-
+In the acclerometer dataset, the study participant' physical activity were measured repeatedly at each minute and recorded as a wide format. Using pivot_longer command, the wide format was transformed to the long format.I have also created a new variable "weekday_or_weekend" to categorize the day of measurement occuring at the weekday (from Monday to Friday) or the weekend (Satuday or Sunday). The final tidy dataset includes the week of measurement (week), the day sequence of measurement (day_id), day of the week )day), the categorized weekday or weekend described above (weeksay_or_weekend), minutes of measurement (minutes) and the value at each measurement (measurement). Through this data wrangling process, the final long foramt of the data is more readable that the previous wide format. The original wide dataset includes 35 observations, and the final long dataset includes 50400 observations (=5*7*24*60).  
 
 ## Total activity of each day
 ```{r, echo = FALSE}
@@ -352,6 +355,9 @@ knitr::kable(accem_day_dataset, align = (rep('c', times = 3)),
              caption = "Total activity of each day")
 
 ```
+
+In the table, we can see the summarized activities by day, but it is hard to tell the trend through eye-balling the absolute numbers.
+
 
 ## Daily activity trency
 ```{r, echo = FALSE}
@@ -369,13 +375,29 @@ accem_day_dataset %>%
     plot.title = element_text(hjust = 0.5, size = 12, face = "bold", color = "blue")
   )
 ```
+In the plot, the trend of daily activity is at a relatively higher level at the first three weeks except to the value at the second day as an outlier, compared to the value at fourth and fifth weeks.
+
+
 
 ## A plot to show daily activity for each day
 ```{r, echo = FALSE}
+##Reorder the weekday from "Monday" to "Sunday"
+accem_dataset$day <- factor(accem_dataset$day, 
+                            levels = c("Monday",
+                                       "Tuesday",
+                                       "Wednesday",
+                                       "Thursday",
+                                       "Friday", 
+                                       "Saturday", 
+                                       "Sunday"))
+
 accem_dataset %>% 
   ggplot(aes(x = minutes, y = measured_value, group = day_id, color = day)) +
   geom_line() +
   facet_grid(day_id~.) 
 
 ```
+
+In this plot of measured values by minutes, we can find that the patient's physicial activity mains at a stable level on weekends (Saturday and Sunday), but fluntuates on weekdays from Monday to Friday.  
+
 
